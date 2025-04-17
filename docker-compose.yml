@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: notes_server
+    ports:
+      - "3000:3000"
+    environment:
+      dbURL: "mongodb://root:example@mongo:27017/"
+      PORT: 3000
+    depends_on:
+      - mongo
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: notes_frontend
+    ports:
+      - "5173:80"
+    environment:
+      VITE_APP_BASE_URL: "http://localhost:5173"
+
+volumes:
+  mongo_data:
